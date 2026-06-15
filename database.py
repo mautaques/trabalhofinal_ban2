@@ -11,11 +11,11 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from urllib.parse import quote_plus
 
 # --- Credenciais ---------------------------------------------------------
-DB_USER = os.getenv("DB_USER", "mautaques")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "bidu0305@") #aqui altera a senha
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "guilherme") #aqui altera a senha
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")
-DB_NAME = os.getenv("DB_NAME", "trabalho_final")
+DB_NAME = os.getenv("DB_NAME", "farmacia")
 
 DB_PASSWORD_ENCODED = quote_plus(DB_PASSWORD)
 
