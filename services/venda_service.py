@@ -104,7 +104,7 @@ class VendaService:
 
     @staticmethod
     def adicionar_item(id_venda, id_produto, quantidade, preco_unitario, desconto=None):
-        """Adiciona um item à venda e recalcula o valor total."""
+        """Adiciona um item à venda. O gatilho trg_atualiza_total_venda recalcula o total."""
         if quantidade <= 0:
             raise ValueError("Quantidade deve ser maior que zero.")
         if preco_unitario <= 0:
@@ -119,37 +119,15 @@ class VendaService:
                 desconto=desconto,
             )
             session.add(item)
-            session.flush()
-
-            # Recalcula valor_total da venda
-            VendaService._recalcular_total(session, id_venda)
             session.commit()
             return item
 
     @staticmethod
     def remover_item(id_item_venda: int):
-        """Remove um item da venda e recalcula o valor total."""
+        """Remove um item da venda. O gatilho trg_atualiza_total_venda recalcula o total."""
         with get_session() as session:
             item = session.get(ItemVenda, id_item_venda)
             if not item:
                 raise ValueError("Item não encontrado.")
-            id_venda = item.id_venda
             session.delete(item)
-            session.flush()
-
-            VendaService._recalcular_total(session, id_venda)
             session.commit()
-
-    # ── Helpers ──────────────────────────────────────────────────────────
-
-    @staticmethod
-    def _recalcular_total(session, id_venda: int):
-        """Recalcula e atualiza o valor_total de uma venda."""
-        venda = session.get(Venda, id_venda)
-        itens = session.query(ItemVenda).filter_by(id_venda=id_venda).all()
-        total = sum(
-            (i.quantidade * i.preco_unitario)
-            - (i.quantidade * i.preco_unitario * (i.desconto or 0))
-            for i in itens
-        )
-        venda.valor_total = total

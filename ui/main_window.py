@@ -16,6 +16,8 @@ from ui.pages.dashboard_page import DashboardPage
 from ui.pages.filial_page import FilialPage
 from ui.pages.fornecedor_page import FornecedorPage
 from ui.pages.produto_page import ProdutoPage
+from ui.pages.devolucao_page import DevolucaoPage
+from ui.pages.reposicao_page import ReposicaoPage
 from ui.pages.venda_page import VendaPage
 from ui.pages.vendedor_page import VendedorPage
 
@@ -31,6 +33,8 @@ class MainWindow(QMainWindow):
         ("🏢  Fornecedores", FornecedorPage),
         ("🏪  Filiais", FilialPage),
         ("🛒  Vendas", VendaPage),
+        ("📋  Reposição", ReposicaoPage),
+        ("🔄  Devoluções", DevolucaoPage),
     ]
 
     def __init__(self):

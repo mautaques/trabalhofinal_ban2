@@ -47,9 +47,9 @@ def get_session():
     """
     return SessionLocal()
 
-"""
+
 def test_connection() -> bool:
-    Verifica se a conexão com o banco está funcionando.
+    """ Verifica se a conexão com o banco está funcionando. """
     from sqlalchemy import text
 
     try:
@@ -59,28 +59,7 @@ def test_connection() -> bool:
     except Exception as exc:  # noqa: BLE001
         print(f"Falha ao conectar no PostgreSQL: {exc}")
         return False
-"""
 
-def test_connection() -> bool:
-    from sqlalchemy import text
-
-    try:
-        with engine.connect() as conn:
-            # Confirma qual banco está conectado
-            result = conn.execute(text("SELECT current_database(), current_schema()"))
-            print(f"Conectado em: {result.fetchone()}")
-            
-            # Lista as tabelas visíveis
-            result = conn.execute(text(
-                "SELECT table_name FROM information_schema.tables "
-                "WHERE table_schema = 'public' ORDER BY table_name"
-            ))
-            tables = [row[0] for row in result]
-            print(f"Tabelas no schema public: {tables}")
-        return True
-    except Exception as exc:
-        print(f"Falha ao conectar no PostgreSQL: {exc}")
-        return False
 
 if __name__ == "__main__":
     if test_connection():

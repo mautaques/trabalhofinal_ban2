@@ -215,3 +215,27 @@ class FormDialog(QDialog):
                     return
 
         self.accept()
+                continue
+            name = field["name"]
+            label = field.get("label", name)
+            widget = self._widgets[name]
+            ftype = field.get("type", "text")
+
+            if ftype == "text":
+                if not widget.text().strip():  # type: ignore[union-attr]
+                    QMessageBox.warning(
+                        self, "Campo Obrigatório",
+                        f"O campo '{label}' é obrigatório.",
+                    )
+                    widget.setFocus()  # type: ignore[union-attr]
+                    return
+            elif ftype == "textarea":
+                if not widget.toPlainText().strip():  # type: ignore[union-attr]
+                    QMessageBox.warning(
+                        self, "Campo Obrigatório",
+                        f"O campo '{label}' é obrigatório.",
+                    )
+                    widget.setFocus()  # type: ignore[union-attr]
+                    return
+
+        self.accept()

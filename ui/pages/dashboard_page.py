@@ -21,6 +21,8 @@ class DashboardPage(QWidget):
         ("fornecedores", "Fornecedores", "fornecedor"),
         ("filiais", "Filiais", "filial"),
         ("vendas", "Vendas", "venda"),
+        ("reposicoes", "Reposições", "reposicao_estoque"),
+        ("devolucoes", "Devoluções", "devolucao"),
     ]
 
     def __init__(self, parent=None):

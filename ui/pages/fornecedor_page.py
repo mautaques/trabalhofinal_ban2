@@ -36,3 +36,5 @@ class FornecedorPage(CrudPage):
             service=FornecedorService,
             id_key="id_fornecedor",
         )
+            id_key="id_fornecedor",
+        )
