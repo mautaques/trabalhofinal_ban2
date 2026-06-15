@@ -30,7 +30,11 @@ class VendaService:
 
     @staticmethod
     def buscar(termo: str):
-        """Busca vendas por cupom fiscal ou nome do cliente."""
+        """Busca vendas por cupom fiscal ou nome do cliente.
+
+        Usa outer join para que vendas sem cliente também apareçam (filtradas
+        pelo cupom fiscal).
+        """
         with get_session() as session:
             return (
                 session.query(Venda)
@@ -39,7 +43,7 @@ class VendaService:
                     joinedload(Venda.vendedor),
                     joinedload(Venda.cliente),
                 )
-                .join(Venda.cliente)
+                .outerjoin(Venda.cliente)
                 .filter(
                     or_(
                         Venda.cupom_fiscal.cast(String).ilike(f"%{termo}%"),
@@ -52,9 +56,12 @@ class VendaService:
 
     @staticmethod
     def criar(id_filial, id_vendedor, id_cliente, cupom_fiscal, forma_pagamento):
-        """Cria uma nova venda (sem itens inicialmente)."""
-        if not id_filial or not id_vendedor or not id_cliente:
-            raise ValueError("Filial, vendedor e cliente são obrigatórios.")
+        """Cria uma nova venda (sem itens inicialmente).
+
+        O cliente é opcional — uma venda pode ser feita sem cliente informado.
+        """
+        if not id_filial or not id_vendedor:
+            raise ValueError("Filial e vendedor são obrigatórios.")
         if not cupom_fiscal:
             raise ValueError("Cupom fiscal é obrigatório.")
 

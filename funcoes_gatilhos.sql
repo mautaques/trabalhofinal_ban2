@@ -120,18 +120,29 @@ CREATE OR REPLACE FUNCTION recebe_reposicao(
 )
 RETURNS TEXT AS $$
 DECLARE
-    v_id_filial  INTEGER;
-    v_id_produto INTEGER;
+    v_id_filial    INTEGER;
+    v_id_produto   INTEGER;
+    v_status_atual VARCHAR(20);
 BEGIN
-    -- Atualiza o status para RECEBIDO
-    UPDATE reposicao_estoque
-    SET status = 'RECEBIDO'
-    WHERE id_reposicao = p_id_reposicao
-    RETURNING id_filial_destino INTO v_id_filial;
+    -- Verifica o status atual: só recebe pedido APROVADO ou ENVIADO
+    SELECT status, id_filial_destino INTO v_status_atual, v_id_filial
+    FROM reposicao_estoque
+    WHERE id_reposicao = p_id_reposicao;
 
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Reposição % não encontrada.', p_id_reposicao;
     END IF;
+
+    IF v_status_atual NOT IN ('APROVADO', 'ENVIADO') THEN
+        RAISE EXCEPTION
+            'Só é possível receber um pedido APROVADO ou ENVIADO (status atual: %).',
+            v_status_atual;
+    END IF;
+
+    -- Atualiza o status para RECEBIDO
+    UPDATE reposicao_estoque
+    SET status = 'RECEBIDO'
+    WHERE id_reposicao = p_id_reposicao;
 
     -- Registra o recebimento
     INSERT INTO recebido (id_reposicao, quantidade, divergência)
@@ -153,7 +164,55 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-/* Função 4 
+/* Função 3.1
+Altera o status de um pedido de reposição respeitando as transições válidas:
+  PENDENTE -> APROVADO -> ENVIADO -> (RECEBIDO via recebe_reposicao)
+  PENDENTE/APROVADO/ENVIADO -> CANCELADO
+RECEBIDO e CANCELADO são estados finais.
+*/
+CREATE OR REPLACE FUNCTION altera_status_reposicao(
+    p_id_reposicao INTEGER,
+    p_novo_status  VARCHAR
+)
+RETURNS TEXT AS $$
+DECLARE
+    v_status_atual VARCHAR(20);
+BEGIN
+    SELECT status INTO v_status_atual
+    FROM reposicao_estoque
+    WHERE id_reposicao = p_id_reposicao;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Reposição % não encontrada.', p_id_reposicao;
+    END IF;
+
+    IF p_novo_status = 'APROVADO' THEN
+        IF v_status_atual <> 'PENDENTE' THEN
+            RAISE EXCEPTION 'Só é possível aprovar um pedido PENDENTE (status atual: %).', v_status_atual;
+        END IF;
+    ELSIF p_novo_status = 'ENVIADO' THEN
+        IF v_status_atual <> 'APROVADO' THEN
+            RAISE EXCEPTION 'Só é possível enviar um pedido APROVADO (status atual: %).', v_status_atual;
+        END IF;
+    ELSIF p_novo_status = 'CANCELADO' THEN
+        IF v_status_atual IN ('RECEBIDO', 'CANCELADO') THEN
+            RAISE EXCEPTION 'Não é possível cancelar um pedido com status %.', v_status_atual;
+        END IF;
+    ELSE
+        RAISE EXCEPTION 'Status inválido para esta operação: %. Use APROVADO, ENVIADO ou CANCELADO.', p_novo_status;
+    END IF;
+
+    UPDATE reposicao_estoque
+    SET status = p_novo_status
+    WHERE id_reposicao = p_id_reposicao;
+
+    RETURN FORMAT('Pedido %s: status alterado de %s para %s.',
+                  p_id_reposicao, v_status_atual, p_novo_status);
+END;
+$$ LANGUAGE plpgsql;
+
+
+/* Função 4
 Registra a devolução de vendas de produtos nas tabelas devolucao e item_devolucao,
 e atualiza a tabela estoque.
 */

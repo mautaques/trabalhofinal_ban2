@@ -262,14 +262,15 @@ class _NovaVendaDialog(QDialog):
             pass
         layout.addRow("Vendedor *:", self.cmb_vendedor)
 
-        # Cliente
+        # Cliente (opcional)
         self.cmb_cliente = QComboBox()
+        self.cmb_cliente.addItem("— Sem cliente —", None)
         try:
             for c in ClienteService.listar_todos():
                 self.cmb_cliente.addItem(f"{c.nome} ({c.cpf})", c.id_cliente)
         except Exception:
             pass
-        layout.addRow("Cliente *:", self.cmb_cliente)
+        layout.addRow("Cliente:", self.cmb_cliente)
 
         # Cupom fiscal
         self.spn_cupom = QSpinBox()

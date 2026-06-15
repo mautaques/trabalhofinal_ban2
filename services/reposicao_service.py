@@ -77,7 +77,7 @@ class ReposicaoService:
             result = session.execute(
                 text(
                     "SELECT insere_pedido_reposicao("
-                    "  :fornecedor, :filial, :itens::jsonb"
+                    "  :fornecedor, :filial, CAST(:itens AS jsonb)"
                     ")"
                 ),
                 {
@@ -105,3 +105,31 @@ class ReposicaoService:
             ).scalar()
             session.commit()
             return result
+
+    # ── Transições de status ─────────────────────────────────────────────
+
+    @staticmethod
+    def _altera_status(id_reposicao, novo_status):
+        """Chama a função SQL altera_status_reposicao() (valida a transição)."""
+        with get_session() as session:
+            result = session.execute(
+                text("SELECT altera_status_reposicao(:id_rep, :status)"),
+                {"id_rep": id_reposicao, "status": novo_status},
+            ).scalar()
+            session.commit()
+            return result
+
+    @staticmethod
+    def aprovar(id_reposicao):
+        """Marca o pedido como APROVADO (apenas se estiver PENDENTE)."""
+        return ReposicaoService._altera_status(id_reposicao, "APROVADO")
+
+    @staticmethod
+    def enviar(id_reposicao):
+        """Marca o pedido como ENVIADO (apenas se estiver APROVADO)."""
+        return ReposicaoService._altera_status(id_reposicao, "ENVIADO")
+
+    @staticmethod
+    def cancelar(id_reposicao):
+        """Cancela o pedido (se não estiver RECEBIDO nem CANCELADO)."""
+        return ReposicaoService._altera_status(id_reposicao, "CANCELADO")

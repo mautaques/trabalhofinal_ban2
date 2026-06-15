@@ -77,7 +77,7 @@ class MainWindow(QMainWindow):
         self.gif_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._movie = QMovie(GIF_PATH)
         if self._movie.isValid():
-            self._movie.setScaledSize(QSize(180, 120))
+            self._movie.setScaledSize(QSize(180, 150))
             self.gif_label.setMovie(self._movie)
             self._movie.start()
             side_layout.addWidget(self.gif_label)

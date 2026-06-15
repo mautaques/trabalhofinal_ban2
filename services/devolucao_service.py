@@ -84,7 +84,7 @@ class DevolucaoService:
         with get_session() as session:
             result = session.execute(
                 text(
-                    "SELECT devolver_produtos(:id_venda, :itens::jsonb, :motivo, :tipo)"
+                    "SELECT devolver_produtos(:id_venda, CAST(:itens AS jsonb), :motivo, :tipo)"
                 ),
                 {
                     "id_venda": id_venda,

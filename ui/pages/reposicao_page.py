@@ -58,7 +58,10 @@ class ReposicaoPage(QWidget):
 
         for text, slot in [
             ("Novo Pedido", self._on_novo_pedido),
+            ("Aprovar", self._on_aprovar),
+            ("Enviar", self._on_enviar),
             ("Receber Pedido", self._on_receber),
+            ("Cancelar", self._on_cancelar),
             ("Atualizar", self.load_data),
         ]:
             btn = QPushButton(text)
@@ -198,6 +201,34 @@ class ReposicaoPage(QWidget):
                 self.load_data()
             except Exception as exc:
                 QMessageBox.critical(self, "Erro ao Receber", str(exc))
+
+    def _on_aprovar(self):
+        self._mudar_status(ReposicaoService.aprovar, "aprovar")
+
+    def _on_enviar(self):
+        self._mudar_status(ReposicaoService.enviar, "enviar")
+
+    def _on_cancelar(self):
+        self._mudar_status(ReposicaoService.cancelar, "cancelar")
+
+    def _mudar_status(self, acao_service, verbo: str):
+        """Confirma e aplica uma transição de status no pedido selecionado."""
+        if not self._selected_rep:
+            QMessageBox.warning(self, "Aviso", "Selecione um pedido.")
+            return
+        reply = QMessageBox.question(
+            self, "Confirmar",
+            f"Deseja {verbo} o pedido #{self._selected_rep.numero_pedido}?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        )
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+        try:
+            msg = acao_service(self._selected_rep.id_reposicao)
+            QMessageBox.information(self, "Sucesso", msg)
+            self.load_data()
+        except Exception as exc:
+            QMessageBox.critical(self, "Erro", str(exc))
 
 
 class _NovoPedidoReposicaoDialog(QDialog):

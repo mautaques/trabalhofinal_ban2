@@ -27,8 +27,8 @@ class Venda(Base):
     id_vendedor: Mapped[int] = mapped_column(
         ForeignKey("vendedor.id_vendedor"), nullable=False
     )
-    id_cliente: Mapped[int] = mapped_column(
-        ForeignKey("cliente.id_cliente"), nullable=False
+    id_cliente: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("cliente.id_cliente"), nullable=True
     )
     cupom_fiscal: Mapped[int] = mapped_column(Integer, unique=True, nullable=False)
     data_hora: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)

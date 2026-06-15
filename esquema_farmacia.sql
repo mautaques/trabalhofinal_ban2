@@ -134,7 +134,7 @@ CREATE TABLE venda (
     id_venda        SERIAL PRIMARY KEY,
     id_filial       INTEGER NOT NULL REFERENCES filial(id_filial),
     id_vendedor     INTEGER NOT NULL REFERENCES vendedor(id_vendedor),
-    id_cliente      INTEGER NOT NULL REFERENCES cliente(id_cliente),
+    id_cliente      INTEGER REFERENCES cliente(id_cliente),
     cupom_fiscal    INTEGER UNIQUE NOT NULL,
     data_hora       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     forma_pagamento VARCHAR(20) CHECK (forma_pagamento IN ('Pix', 'Cartão de Crédito', 'Cartão de Débito')),
