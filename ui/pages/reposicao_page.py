@@ -232,10 +232,6 @@ class _NovoPedidoReposicaoDialog(QDialog):
             pass
         form.addRow("Filial Destino *:", self.cmb_filial)
 
-        self.spn_pedido = QSpinBox()
-        self.spn_pedido.setRange(1, 999_999_999)
-        form.addRow("Nº Pedido *:", self.spn_pedido)
-
         layout.addLayout(form)
 
         itens_label = QLabel("Itens do Pedido")
@@ -304,7 +300,6 @@ class _NovoPedidoReposicaoDialog(QDialog):
         return {
             "id_fornecedor": self.cmb_fornecedor.currentData(),
             "id_filial_destino": self.cmb_filial.currentData(),
-            "numero_pedido": self.spn_pedido.value(),
             "itens": itens,
         }
 

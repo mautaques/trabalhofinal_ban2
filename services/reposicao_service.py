@@ -65,20 +65,22 @@ class ReposicaoService:
             return rows
 
     @staticmethod
-    def insere_pedido(id_fornecedor, id_filial_destino, numero_pedido, itens):
-        """Chama a função SQL insere_pedido_reposicao()."""
+    def insere_pedido(id_fornecedor, id_filial_destino, itens):
+        """Chama a função SQL insere_pedido_reposicao().
+
+        O número do pedido é gerado automaticamente pelo banco.
+        """
         itens_json = json.dumps(itens)
         with get_session() as session:
             result = session.execute(
                 text(
                     "SELECT insere_pedido_reposicao("
-                    "  :fornecedor, :filial, :pedido, :itens::jsonb"
+                    "  :fornecedor, :filial, :itens::jsonb"
                     ")"
                 ),
                 {
                     "fornecedor": id_fornecedor,
                     "filial": id_filial_destino,
-                    "pedido": numero_pedido,
                     "itens": itens_json,
                 },
             ).scalar()

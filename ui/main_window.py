@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import (
 
 from ui.pages.cliente_page import ClientePage
 from ui.pages.dashboard_page import DashboardPage
+from ui.pages.estoque_page import EstoquePage
 from ui.pages.filial_page import FilialPage
 from ui.pages.fornecedor_page import FornecedorPage
 from ui.pages.produto_page import ProdutoPage
@@ -33,6 +34,7 @@ class MainWindow(QMainWindow):
         ("🏢  Fornecedores", FornecedorPage),
         ("🏪  Filiais", FilialPage),
         ("🛒  Vendas", VendaPage),
+        ("📥  Estoque", EstoquePage),
         ("📋  Reposição", ReposicaoPage),
         ("🔄  Devoluções", DevolucaoPage),
     ]
