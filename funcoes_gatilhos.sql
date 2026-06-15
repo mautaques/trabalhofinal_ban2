@@ -37,12 +37,25 @@ BEGIN
     FOR v_item IN SELECT * FROM jsonb_array_elements(p_itens_reposicao)
     LOOP
         v_id_produto     := (v_item->>'id_produto')::INTEGER;
-        v_id_lote        := (v_item->>'id_lote')::INTEGER;
-        v_quantidade     := (v_item->>'quantidade')::INTEGER; 
+        v_quantidade     := (v_item->>'quantidade')::INTEGER;
         v_valor_unitario := (v_item->>'valor_unitario')::NUMERIC;
 
+        -- O lote é resolvido automaticamente a partir do produto
+        -- (lote daquele produto com a validade mais recente).
+        SELECT id_lote INTO v_id_lote
+        FROM lote
+        WHERE id_produto = v_id_produto
+        ORDER BY data_validade DESC
+        LIMIT 1;
+
+        IF v_id_lote IS NULL THEN
+            RAISE EXCEPTION
+                'Produto % não possui lote cadastrado. Cadastre um lote antes de repor.',
+                v_id_produto;
+        END IF;
+
         -- Apenas insere. O GATILHO trg_atualiza_total_reposicao soma o valor total
-        INSERT INTO item_reposicao (id_reposicao, id_produto, id_lote, quantidade, valor_unitario) 
+        INSERT INTO item_reposicao (id_reposicao, id_produto, id_lote, quantidade, valor_unitario)
         VALUES (v_id_reposicao, v_id_produto, v_id_lote, v_quantidade, v_valor_unitario);
     END LOOP;
 

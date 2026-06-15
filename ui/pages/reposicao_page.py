@@ -4,6 +4,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
     QAbstractItemView,
+    QAbstractSpinBox,
     QComboBox,
     QDialog,
     QDialogButtonBox,
@@ -234,9 +235,23 @@ class _NovoPedidoReposicaoDialog(QDialog):
 
         layout.addLayout(form)
 
+        # Carrega os produtos uma única vez; o valor unitário de cada item é
+        # preenchido automaticamente a partir do preço de custo do produto.
+        try:
+            self._produtos = ProdutoService.listar_todos()
+        except Exception:
+            self._produtos = []
+        self._preco_por_produto = {
+            p.id_produto: float(p.preco_custo or 0) for p in self._produtos
+        }
+
         itens_label = QLabel("Itens do Pedido")
         itens_label.setFont(QFont("", 11, QFont.Weight.Bold))
         layout.addWidget(itens_label)
+
+        # Criado antes da primeira linha de item, pois _add_item_row já o atualiza.
+        self.lbl_total = QLabel()
+        self.lbl_total.setFont(QFont("", 11, QFont.Weight.Bold))
 
         self._itens_container = QVBoxLayout()
         layout.addLayout(self._itens_container)
@@ -245,6 +260,8 @@ class _NovoPedidoReposicaoDialog(QDialog):
         btn_add = QPushButton("+ Adicionar Item")
         btn_add.clicked.connect(self._add_item_row)
         layout.addWidget(btn_add)
+
+        layout.addWidget(self.lbl_total)
 
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok
@@ -261,17 +278,9 @@ class _NovoPedidoReposicaoDialog(QDialog):
 
         cmb_produto = QComboBox()
         cmb_produto.setMinimumWidth(180)
-        try:
-            for p in ProdutoService.listar_todos():
-                cmb_produto.addItem(p.nome_produto, p.id_produto)
-        except Exception:
-            pass
+        for p in self._produtos:
+            cmb_produto.addItem(p.nome_produto, p.id_produto)
         row_layout.addWidget(cmb_produto)
-
-        spn_lote = QSpinBox()
-        spn_lote.setRange(1, 999_999)
-        spn_lote.setPrefix("Lote: ")
-        row_layout.addWidget(spn_lote)
 
         spn_qtd = QSpinBox()
         spn_qtd.setRange(1, 99999)
@@ -279,23 +288,53 @@ class _NovoPedidoReposicaoDialog(QDialog):
         spn_qtd.setPrefix("Qtd: ")
         row_layout.addWidget(spn_qtd)
 
+        # Caixa de valor: somente leitura, mostra o subtotal da linha
+        # (quantidade × preço de custo). Não é editável manualmente.
         spn_valor = QDoubleSpinBox()
-        spn_valor.setRange(0.01, 99999.99)
+        spn_valor.setRange(0.00, 999_999_999.99)
         spn_valor.setDecimals(2)
         spn_valor.setPrefix("R$ ")
+        spn_valor.setReadOnly(True)
+        spn_valor.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+        spn_valor.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        spn_valor.setToolTip("Subtotal = quantidade × preço de custo")
         row_layout.addWidget(spn_valor)
 
-        self._itens_widgets.append((cmb_produto, spn_lote, spn_qtd, spn_valor))
+        # Recalcula o subtotal da linha ao mudar a quantidade ou o produto.
+        spn_qtd.valueChanged.connect(
+            lambda _v, c=cmb_produto, q=spn_qtd, s=spn_valor: self._atualiza_linha(c, q, s)
+        )
+        cmb_produto.currentIndexChanged.connect(
+            lambda _i, c=cmb_produto, q=spn_qtd, s=spn_valor: self._atualiza_linha(c, q, s)
+        )
+
+        self._itens_widgets.append((cmb_produto, spn_qtd, spn_valor))
         self._itens_container.addWidget(row_widget)
+
+        # Calcula o subtotal do produto inicialmente selecionado.
+        self._atualiza_linha(cmb_produto, spn_qtd, spn_valor)
+
+    def _atualiza_linha(self, cmb_produto, spn_qtd, spn_valor):
+        """Atualiza o subtotal da linha (quantidade × preço de custo) e o total."""
+        unitario = self._preco_por_produto.get(cmb_produto.currentData(), 0)
+        spn_valor.setValue(unitario * spn_qtd.value())
+        self._atualiza_total()
+
+    def _atualiza_total(self):
+        """Soma os subtotais de todos os itens e exibe o total do pedido."""
+        total = sum(spn_valor.value() for _cmb, _qtd, spn_valor in self._itens_widgets)
+        self.lbl_total.setText(f"Total do Pedido: R$ {total:.2f}")
 
     def get_values(self) -> dict:
         itens = []
-        for cmb, spn_lote, spn_qtd, spn_valor in self._itens_widgets:
+        for cmb, spn_qtd, _spn_valor in self._itens_widgets:
+            # valor_unitario é o preço de custo do produto; a caixa exibe o
+            # subtotal (quantidade × preço), por isso não é usada aqui.
+            id_produto = cmb.currentData()
             itens.append({
-                "id_produto": cmb.currentData(),
-                "id_lote": spn_lote.value(),
+                "id_produto": id_produto,
                 "quantidade": spn_qtd.value(),
-                "valor_unitario": spn_valor.value(),
+                "valor_unitario": self._preco_por_produto.get(id_produto, 0),
             })
         return {
             "id_fornecedor": self.cmb_fornecedor.currentData(),

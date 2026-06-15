@@ -64,6 +64,7 @@ CREATE TABLE filial (
 
 CREATE TABLE lote (
     id_lote         SERIAL PRIMARY KEY,
+    id_produto      INTEGER NOT NULL REFERENCES produto(id_produto),
     numero_lote     INTEGER UNIQUE NOT NULL,
     data_fabricacao DATE NOT NULL,
     data_validade   DATE NOT NULL,
@@ -267,18 +268,21 @@ INSERT INTO filial (codigo_filial, cnpj, nome_fantasia, nome_gerente, telefone, 
     ('FIL-003', '12.345.678/0003-03', 'FarmaJoinville Sul',     'Marcos Andrade',  '(47) 3322-0003', 'Rua XV de Novembro, 800, Aventureiro, Joinville/SC');
  
 -- 7. Lote
--- 10 registros
-INSERT INTO lote (numero_lote, data_fabricacao, data_validade, quantidade) VALUES
-    (10001, '2024-01-10', '2026-01-10', 100),
-    (10002, '2024-02-15', '2026-02-15', 150),
-    (10003, '2024-03-20', '2026-03-20', 200),
-    (10004, '2024-04-05', '2026-04-05', 100),
-    (10005, '2024-05-12', '2026-05-12', 300),
-    (10006, '2024-06-18', '2025-06-18',  80),  -- vence em 2025 — alerta
-    (10007, '2024-07-22', '2025-07-22', 250),  -- vence em 2025 — alerta
-    (10008, '2024-08-30', '2026-08-30', 120),
-    (10009, '2024-09-14', '2026-09-14', 500),
-    (10010, '2024-10-01', '2026-10-01', 200);
+-- 13 registros (um lote por produto estocado; id_lote segue a ordem abaixo)
+INSERT INTO lote (id_produto, numero_lote, data_fabricacao, data_validade, quantidade) VALUES
+    (1,  10001, '2024-01-10', '2026-01-10', 100),  -- id_lote 1
+    (2,  10002, '2024-02-15', '2026-02-15', 150),  -- id_lote 2
+    (3,  10003, '2024-03-20', '2026-03-20', 200),  -- id_lote 3
+    (4,  10004, '2024-04-05', '2026-04-05', 100),  -- id_lote 4
+    (5,  10005, '2024-05-12', '2026-05-12', 300),  -- id_lote 5
+    (6,  10006, '2024-06-18', '2025-06-18',  80),  -- id_lote 6 — vence em 2025 — alerta
+    (7,  10007, '2024-07-22', '2025-07-22', 250),  -- id_lote 7 — vence em 2025 — alerta
+    (8,  10008, '2024-08-30', '2026-08-30', 120),  -- id_lote 8
+    (9,  10009, '2024-09-14', '2026-09-14', 500),  -- id_lote 9
+    (10, 10010, '2024-10-01', '2026-10-01', 200),  -- id_lote 10
+    (13, 10011, '2024-11-05', '2026-11-05', 150),  -- id_lote 11
+    (17, 10012, '2024-12-10', '2026-12-10', 300),  -- id_lote 12
+    (19, 10013, '2025-01-15', '2027-01-15', 200);  -- id_lote 13
  
 -- 8. Medicamento
 -- 8 registros
@@ -323,18 +327,18 @@ INSERT INTO estoque (id_lote, id_produto, id_filial,
     (3,  3,  1, 100,  10,   8),   -- Frontal — abaixo do mínimo!
     (4,  4,  1, 200,  20,  80),   -- Amoxicilina
     (5,  5,  1, 300,  30, 150),   -- Dipirona
-    (6,  9,  1, 150,  15,  12),   -- Protetor Solar — lote próximo vencimento
-    (7,  13, 1, 200,  20,  90),   -- Escova Dental — lote próximo vencimento
+    (9,  9,  1, 150,  15,  12),   -- Protetor Solar — lote próximo vencimento
+    (11, 13, 1, 200,  20,  90),   -- Escova Dental — lote próximo vencimento
     -- Filial 2 (Norte)
     (1,  1,  2, 100,  10,  20),   -- Ritalina
-    (4,  5,  2, 300,  30,   5),   -- Dipirona — abaixo do mínimo!
-    (5,  6,  2, 150,  15,  60),   -- Ibuprofeno
-    (8,  10, 2, 100,  10,  35),   -- Hidratante
-    (9,  17, 2, 500,  50, 200),   -- Água Mineral
+    (5,  5,  2, 300,  30,   5),   -- Dipirona — abaixo do mínimo!
+    (6,  6,  2, 150,  15,  60),   -- Ibuprofeno
+    (10, 10, 2, 100,  10,  35),   -- Hidratante
+    (12, 17, 2, 500,  50, 200),   -- Água Mineral
     -- Filial 3 (Sul)
-    (2,  7,  3, 150,  15,  70),   -- Omeprazol
-    (3,  8,  3, 150,  15,  40),   -- Loratadina
-    (10, 19, 3, 200,  20,   3);   -- Vitamina C — abaixo do mínimo!
+    (7,  7,  3, 150,  15,  70),   -- Omeprazol
+    (8,  8,  3, 150,  15,  40),   -- Loratadina
+    (13, 19, 3, 200,  20,   3);   -- Vitamina C — abaixo do mínimo!
  
 -- 12. Reposicao_Estoque
 -- 5 registros
@@ -358,12 +362,12 @@ INSERT INTO item_reposicao (id_reposicao, id_produto, id_lote, quantidade, valor
     (2, 5,  5, 200,  4.50),  -- Dipirona
     -- Reposicao 3 (Hypera — Filial Norte)
     (3, 6,  6, 80,   6.00),  -- Ibuprofeno
-    (3, 8,  7, 100,  5.00),  -- Loratadina
+    (3, 8,  8, 100,  5.00),  -- Loratadina
     -- Reposicao 4 (UniDistrib — Filial Norte — pendente)
-    (4, 9,  8, 60,  18.00),  -- Protetor Solar
-    (4, 10, 9, 70,  14.00),  -- Hidratante
+    (4, 9,  9, 60,  18.00),  -- Protetor Solar
+    (4, 10, 10, 70, 14.00),  -- Hidratante
     -- Reposicao 5 (DrogariaMax — Filial Sul — aprovada)
-    (5, 19, 10, 120, 5.00);  -- Vitamina C
+    (5, 19, 13, 120, 5.00);  -- Vitamina C
  
 -- 14. Recebido
 -- 3 registros (Reposicões com status RECEBIDO)

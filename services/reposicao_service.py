@@ -68,7 +68,9 @@ class ReposicaoService:
     def insere_pedido(id_fornecedor, id_filial_destino, itens):
         """Chama a função SQL insere_pedido_reposicao().
 
-        O número do pedido é gerado automaticamente pelo banco.
+        O número do pedido é gerado automaticamente pelo banco, assim como o
+        lote de cada item — resolvido a partir do produto (cada item carrega
+        apenas id_produto, quantidade e valor_unitario).
         """
         itens_json = json.dumps(itens)
         with get_session() as session:

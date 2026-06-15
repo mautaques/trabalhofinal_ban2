@@ -7,7 +7,6 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QDialog,
     QDialogButtonBox,
-    QDoubleSpinBox,
     QFormLayout,
     QHBoxLayout,
     QLabel,
@@ -24,7 +23,6 @@ from PyQt6.QtWidgets import (
 
 from services.cliente_service import ClienteService
 from services.filial_service import FilialService
-from services.produto_service import ProdutoService
 from services.venda_service import VendaService
 from services.vendedor_service import VendedorService
 
@@ -87,21 +85,9 @@ class VendaPage(QWidget):
         items_layout = QVBoxLayout(items_panel)
         items_layout.setContentsMargins(0, 8, 0, 0)
 
-        items_header = QHBoxLayout()
         self.items_title = QLabel("Itens da Venda")
         self.items_title.setFont(QFont("", 12, QFont.Weight.Bold))
-        items_header.addWidget(self.items_title)
-        items_header.addStretch()
-
-        btn_add = QPushButton("Adicionar Item")
-        btn_add.clicked.connect(self._on_add_item)
-        items_header.addWidget(btn_add)
-
-        btn_rm = QPushButton("Remover Item")
-        btn_rm.clicked.connect(self._on_remove_item)
-        items_header.addWidget(btn_rm)
-
-        items_layout.addLayout(items_header)
+        items_layout.addWidget(self.items_title)
 
         self.items_table = self._make_table(
             ["ID", "Produto", "Quantidade", "Preço Unit. (R$)",
@@ -238,55 +224,6 @@ class VendaPage(QWidget):
             except Exception as exc:
                 QMessageBox.critical(self, "Erro ao Excluir", str(exc))
 
-    # ── CRUD Itens ───────────────────────────────────────────────────────
-
-    def _on_add_item(self):
-        if not self._selected_venda:
-            QMessageBox.warning(self, "Aviso", "Selecione uma venda primeiro.")
-            return
-        dlg = _NovoItemDialog(self)
-        if dlg.exec() == QDialog.DialogCode.Accepted:
-            vals = dlg.get_values()
-            try:
-                VendaService.adicionar_item(
-                    self._selected_venda.id_venda, **vals
-                )
-                self._on_venda_selected()  # recarrega itens
-                self.load_data()           # recarrega total da venda
-                # Re-seleciona a venda
-                for i, v in enumerate(self._vendas):
-                    if v.id_venda == self._selected_venda.id_venda:
-                        self.vendas_table.selectRow(i)
-                        break
-            except Exception as exc:
-                QMessageBox.critical(self, "Erro ao Adicionar Item", str(exc))
-
-    def _on_remove_item(self):
-        if not self._selected_venda:
-            QMessageBox.warning(self, "Aviso", "Selecione uma venda primeiro.")
-            return
-        rows = self.items_table.selectionModel().selectedRows()
-        if not rows:
-            QMessageBox.warning(self, "Aviso", "Selecione um item para remover.")
-            return
-        item = self._itens[rows[0].row()]
-        reply = QMessageBox.question(
-            self, "Confirmar Remoção",
-            "Remover este item da venda?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-        )
-        if reply == QMessageBox.StandardButton.Yes:
-            try:
-                VendaService.remover_item(item.id_item_venda)
-                self._on_venda_selected()
-                self.load_data()
-                for i, v in enumerate(self._vendas):
-                    if v.id_venda == self._selected_venda.id_venda:
-                        self.vendas_table.selectRow(i)
-                        break
-            except Exception as exc:
-                QMessageBox.critical(self, "Erro ao Remover Item", str(exc))
-
 
 # ── Diálogos auxiliares ──────────────────────────────────────────────────
 
@@ -365,81 +302,4 @@ class _NovaVendaDialog(QDialog):
             "id_cliente": self.cmb_cliente.currentData(),
             "cupom_fiscal": self.spn_cupom.value(),
             "forma_pagamento": self.cmb_pgto.currentData(),
-        }
-
-
-class _NovoItemDialog(QDialog):
-    """Formulário para adicionar um item a uma venda existente."""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("Adicionar Item à Venda")
-        self.setMinimumWidth(400)
-        self._setup_ui()
-
-    def _setup_ui(self):
-        layout = QFormLayout(self)
-
-        # Produto
-        self.cmb_produto = QComboBox()
-        try:
-            for p in ProdutoService.listar_todos():
-                self.cmb_produto.addItem(
-                    f"{p.nome_produto} (R$ {p.preco_venda})", p.id_produto
-                )
-        except Exception:
-            pass
-        layout.addRow("Produto *:", self.cmb_produto)
-
-        # Quantidade
-        self.spn_qtd = QSpinBox()
-        self.spn_qtd.setRange(1, 9999)
-        self.spn_qtd.setValue(1)
-        layout.addRow("Quantidade *:", self.spn_qtd)
-
-        # Preço unitário
-        self.spn_preco = QDoubleSpinBox()
-        self.spn_preco.setRange(0.01, 99999.99)
-        self.spn_preco.setDecimals(2)
-        layout.addRow("Preço Unitário (R$) *:", self.spn_preco)
-
-        # Desconto (fração: 0.10 = 10%)
-        self.spn_desconto = QDoubleSpinBox()
-        self.spn_desconto.setRange(0.0, 1.0)
-        self.spn_desconto.setDecimals(2)
-        self.spn_desconto.setSingleStep(0.05)
-        self.spn_desconto.setToolTip("Fração: 0.10 = 10% de desconto")
-        layout.addRow("Desconto (0 a 1):", self.spn_desconto)
-
-        # Atualiza preço quando produto muda
-        self.cmb_produto.currentIndexChanged.connect(self._on_produto_changed)
-        self._on_produto_changed()
-
-        # Botões
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Ok
-            | QDialogButtonBox.StandardButton.Cancel
-        )
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
-        layout.addRow(buttons)
-
-    def _on_produto_changed(self):
-        """Preenche o preço unitário com o preço de venda do produto."""
-        try:
-            id_prod = self.cmb_produto.currentData()
-            if id_prod:
-                prod = ProdutoService.buscar_por_id(id_prod)
-                if prod and prod.preco_venda:
-                    self.spn_preco.setValue(float(prod.preco_venda))
-        except Exception:
-            pass
-
-    def get_values(self) -> dict:
-        desconto = self.spn_desconto.value()
-        return {
-            "id_produto": self.cmb_produto.currentData(),
-            "quantidade": self.spn_qtd.value(),
-            "preco_unitario": self.spn_preco.value(),
-            "desconto": desconto if desconto > 0 else None,
         }
