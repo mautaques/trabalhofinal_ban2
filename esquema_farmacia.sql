@@ -218,16 +218,16 @@ INSERT INTO cliente (nome, cpf, telefone, mail, data_nascimento) VALUES
 -- 4. Fornecedor
 -- 10 registros
 INSERT INTO fornecedor (cnpj, razao_social, nome_fantasia, mail, telefone, condicoes_pagamento, endereco) VALUES
-    ('11.111.111/0001-01', 'EMS S.A.',                    'EMS Pharma',        'vendas@ems.com.br',         '(11) 4196-9000', '30 dias',     'Rodovia SP-101, Km 08, Hortolândia/SP'),
-    ('22.222.222/0001-02', 'Medley Farmacêutica Ltda',    'Medley',            'comercial@medley.com.br',   '(11) 4133-6000', '30/60',       'Av. Prefeito Luís Walter, Sumaré/SP'),
-    ('33.333.333/0001-03', 'Hypermarcas S.A.',            'Hypera Pharma',     'hypera@hypera.com.br',      '(11) 3897-9797', '28 DDL',      'Av. das Nações Unidas, 14401, São Paulo/SP'),
-    ('44.444.444/0001-04', 'Eurofarma Laboratórios S.A.', 'Eurofarma',         'contato@eurofarma.com.br',  '(11) 3627-4500', '30/60/90',    'Av. Vereador José Diniz, São Paulo/SP'),
-    ('55.555.555/0001-05', 'Cimed Indústria Farmac. Ltda','Cimed',             'cimed@cimed.com.br',        '(35) 3829-9000', 'À vista',     'Av. Zuca Lino Ferreira, Poços de Caldas/MG'),
-    ('66.666.666/0001-06', 'Unimed Distribuidora Ltda',   'UniDistrib',        'unidistrib@ud.com.br',      '(47) 3333-0001', '30 dias',     'Rua XV de Novembro, 500, Joinville/SC'),
-    ('77.777.777/0001-07', 'DrogariaMax Distrib. ME',     'DrogariaMax',       'max@drogariamax.com.br',    '(47) 3333-0002', '15 dias',     'Rua Blumenau, 200, Joinville/SC'),
-    ('88.888.888/0001-08', 'Cosméticos Sul Ltda',         'CosméticosSul',     'sul@cosmeticossul.com.br',  '(48) 3222-0001', '30/60',       'Av. Beira Mar, 100, Florianópolis/SC'),
-    ('99.999.999/0001-09', 'HigieneTotal Eireli',         'HigieneTotal',      'total@higienatotal.com.br', '(41) 3111-0001', '28 DDL',      'Rua das Flores, 300, Curitiba/PR'),
-    ('10.101.010/0001-10', 'Nutrição & Saúde Ltda',       'NutriSaúde',        'nutri@nutrisaude.com.br',   '(11) 3000-0001', '30 dias',     'Av. Paulista, 1000, São Paulo/SP');
+    ('60.798.633/0001-78', 'EMS S.A.',                    'EMS Pharma',     'vendas@ems.com.br',         '(11) 4196-9000', '30 dias',  'Rodovia SP-101, Km 08, Hortolândia/SP'),
+    ('44.734.671/0001-51', 'Medley Farmacêutica Ltda',    'Medley',         'comercial@medley.com.br',   '(11) 4133-6000', '30/60',    'Av. Prefeito Luís Walter, Sumaré/SP'),
+    ('02.932.074/0001-91', 'Hypermarcas S.A.',            'Hypera Pharma',  'hypera@hypera.com.br',      '(11) 3897-9797', '28 DDL',   'Av. das Nações Unidas, 14401, São Paulo/SP'),
+    ('61.190.096/0001-92', 'Eurofarma Laboratórios S.A.', 'Eurofarma',      'contato@eurofarma.com.br',  '(11) 3627-4500', '30/60/90', 'Av. Vereador José Diniz, São Paulo/SP'),
+    ('25.005.218/0001-94', 'Cimed Indústria Farmac. Ltda','Cimed',          'cimed@cimed.com.br',        '(35) 3829-9000', 'À vista',  'Av. Zuca Lino Ferreira, Poços de Caldas/MG'),
+    ('12.345.001/0001-01', 'Unimed Distribuidora Ltda',   'UniDistrib',     'unidistrib@ud.com.br',      '(47) 3333-0001', '30 dias',  'Rua XV de Novembro, 500, Joinville/SC'),
+    ('12.345.002/0001-02', 'DrogariaMax Distrib. ME',     'DrogariaMax',    'max@drogariamax.com.br',    '(47) 3333-0002', '15 dias',  'Rua Blumenau, 200, Joinville/SC'),
+    ('12.345.003/0001-03', 'Cosméticos Sul Ltda',         'CosméticosSul',  'sul@cosmeticossul.com.br',  '(48) 3222-0001', '30/60',    'Av. Beira Mar, 100, Florianópolis/SC'),
+    ('12.345.004/0001-04', 'HigieneTotal Eireli',         'HigieneTotal',   'total@higienatotal.com.br', '(41) 3111-0001', '28 DDL',   'Rua das Flores, 300, Curitiba/PR'),
+    ('12.345.005/0001-05', 'Nutrição & Saúde Ltda',       'NutriSaúde',     'nutri@nutrisaude.com.br',   '(11) 3000-0001', '30 dias',  'Av. Paulista, 1000, São Paulo/SP');
  
 -- 5. Produto
 -- 20 registros
@@ -268,17 +268,17 @@ INSERT INTO filial (codigo_filial, cnpj, nome_fantasia, nome_gerente, telefone, 
  
 -- 7. Lote
 -- 10 registros
-INSERT INTO lote (numero_lote, data_fabricacao, data_validade) VALUES
-    (10001, '2024-01-10', '2026-01-10'),
-    (10002, '2024-02-15', '2026-02-15'),
-    (10003, '2024-03-20', '2026-03-20'),
-    (10004, '2024-04-05', '2026-04-05'),
-    (10005, '2024-05-12', '2026-05-12'),
-    (10006, '2024-06-18', '2025-06-18'),  -- vence em 2025 — alerta de vencimento
-    (10007, '2024-07-22', '2025-07-22'),  -- vence em 2025 — alerta de vencimento
-    (10008, '2024-08-30', '2026-08-30'),
-    (10009, '2024-09-14', '2026-09-14'),
-    (10010, '2024-10-01', '2026-10-01');
+INSERT INTO lote (numero_lote, data_fabricacao, data_validade, quantidade) VALUES
+    (10001, '2024-01-10', '2026-01-10', 100),
+    (10002, '2024-02-15', '2026-02-15', 150),
+    (10003, '2024-03-20', '2026-03-20', 200),
+    (10004, '2024-04-05', '2026-04-05', 100),
+    (10005, '2024-05-12', '2026-05-12', 300),
+    (10006, '2024-06-18', '2025-06-18',  80),  -- vence em 2025 — alerta
+    (10007, '2024-07-22', '2025-07-22', 250),  -- vence em 2025 — alerta
+    (10008, '2024-08-30', '2026-08-30', 120),
+    (10009, '2024-09-14', '2026-09-14', 500),
+    (10010, '2024-10-01', '2026-10-01', 200);
  
 -- 8. Medicamento
 -- 8 registros
@@ -387,30 +387,30 @@ INSERT INTO venda (id_filial, id_vendedor, id_cliente, cupom_fiscal,
  
 -- 16. Item_Venda 
 -- 15 registros
-INSERT INTO item_venda (id_venda, id_produto, quantidade, preco_unitario, desconto) VALUES
+INSERT INTO item_venda (id_venda, id_produto, id_prescricao, quantidade, preco_unitario, desconto) VALUES
     -- Venda 1 (Filial Centro — João — Ana Paula)
-    (1,  1, 1,  89.90, 0.00),  -- Ritalina  — controlada
-    (1,  2, 1,  54.90, 0.10),  -- Rivotril  — controlada, 10% desconto
+    (1,  1, 1,    1,  89.90, 0.00),   -- Ritalina  — controlada (prescrição 1)
+    (1,  2, 1,    1,  54.90, 0.10),   -- Rivotril  — controlada (prescrição 1), 10% desconto
     -- Venda 2 (Filial Centro — Aline — Bruno)
-    (2,  5, 5,   9.90, 0.00),  -- Dipirona
-    (2,  9, 1,  39.90, 0.05),  -- Protetor Solar 5% desc
-    (2, 14, 2,   6.90, 0.00),  -- Creme Dental
+    (2,  5, NULL, 5,   9.90, 0.00),   -- Dipirona
+    (2,  9, NULL, 1,  39.90, 0.05),   -- Protetor Solar 5% desc
+    (2, 14, NULL, 2,   6.90, 0.00),   -- Creme Dental
     -- Venda 3 (Filial Centro — Bruna — Carla)
-    (3, 13, 2,   5.90, 0.00),  -- Escova Dental
-    (3, 15, 4,   4.90, 0.00),  -- Sabonete
-    (3, 16, 2,   7.90, 0.00),  -- Fio Dental
+    (3, 13, NULL, 2,   5.90, 0.00),   -- Escova Dental
+    (3, 15, NULL, 4,   4.90, 0.00),   -- Sabonete
+    (3, 16, NULL, 2,   7.90, 0.00),   -- Fio Dental
     -- Venda 4 (Filial Norte — Diego — Daniel)
-    (4,  6, 2,  12.90, 0.00),  -- Ibuprofeno
+    (4,  6, NULL, 2,  12.90, 0.00),   -- Ibuprofeno
     -- Venda 5 (Filial Norte — Rafael — Eduarda)
-    (5, 10, 2,  29.90, 0.00),  -- Hidratante
-    (5, 11, 1,  24.90, 0.00),  -- Shampoo
+    (5, 10, NULL, 2,  29.90, 0.00),   -- Hidratante
+    (5, 11, NULL, 1,  24.90, 0.00),   -- Shampoo
     -- Venda 6 (Filial Norte — Diego — Fábio)
-    (6,  3, 1,  43.90, 0.00),  -- Frontal — controlado
+    (6,  3, 2,    1,  43.90, 0.00),   -- Frontal — controlado (prescrição 2)
     -- Venda 7 (Filial Sul — Lucas — Gabriela)
-    (7, 17, 4,   2.50, 0.00),  -- Água Mineral
-    (7, 18, 3,   3.90, 0.00),  -- Barra de Cereal
+    (7, 17, NULL, 4,   2.50, 0.00),   -- Água Mineral
+    (7, 18, NULL, 3,   3.90, 0.00),   -- Barra de Cereal
     -- Venda 8 (Filial Sul — Thiago — Henrique)
-    (8,  1, 1,  89.90, 0.00);  -- Ritalina — controlado
+    (8,  1, 3,    1,  89.90, 0.00);   -- Ritalina — controlado (prescrição 3)
 
 -- 17. Devolucao 
 -- 4 registros
@@ -433,3 +433,5 @@ INSERT INTO item_devolucao (id_devolucao, id_produto, quantidade) VALUES
     (3, 11, 1),   -- Shampoo
     -- Devolução 4 (refere-se à Venda 7)
     (4, 17, 2);   -- Água Mineral
+
+COMMIT;
