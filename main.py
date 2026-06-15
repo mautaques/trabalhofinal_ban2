@@ -1,5 +1,3 @@
-"""Ponto de entrada do Sistema de Gerência de Farmácia."""
-
 import os
 import sys
 
