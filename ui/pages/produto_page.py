@@ -48,5 +48,3 @@ class ProdutoPage(CrudPage):
             service=ProdutoService,
             id_key="id_produto",
         )
-            id_key="id_produto",
-        )

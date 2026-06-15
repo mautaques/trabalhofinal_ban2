@@ -34,5 +34,3 @@ class FilialPage(CrudPage):
             service=FilialService,
             id_key="id_filial",
         )
-            id_key="id_filial",
-        )
