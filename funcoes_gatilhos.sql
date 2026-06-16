@@ -9,39 +9,57 @@ Inserir um pedido de reposição no sistema, atualizando as tabelas:
 reposicao_estoque e item_reposicao.
 A FUNÇÃO SÓ PODE SER USADA COM PRODUTOS JÁ CADASTRADOS.
 */
+DROP FUNCTION IF EXISTS insere_pedido_reposicao(INTEGER, INTEGER, INTEGER, JSONB, TIMESTAMP);
 CREATE OR REPLACE FUNCTION insere_pedido_reposicao(
     p_id_fornecedor     INTEGER,
     p_id_filial_destino INTEGER,
-    p_numero_pedido     INTEGER,
     p_itens_reposicao   JSONB,
     p_data_pedido       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
 RETURNS TEXT AS $$
-DECLARE 
+DECLARE
     v_id_reposicao    INTEGER;
+    v_numero_pedido   INTEGER;
     v_item            JSONB;
     v_id_produto      INTEGER;
     v_id_lote         INTEGER;
-    v_quantidade      INTEGER;               
+    v_quantidade      INTEGER;
     v_valor_unitario  NUMERIC(10,2);
 BEGIN
-    INSERT INTO reposicao_estoque (id_fornecedor, id_filial_destino, numero_pedido, data_pedido) 
-    VALUES (p_id_fornecedor, p_id_filial_destino, p_numero_pedido, p_data_pedido)
+    -- numero_pedido é gerado automaticamente (próximo número da sequência)
+    SELECT COALESCE(MAX(numero_pedido), 0) + 1 INTO v_numero_pedido
+    FROM reposicao_estoque;
+
+    INSERT INTO reposicao_estoque (id_fornecedor, id_filial_destino, numero_pedido, data_pedido)
+    VALUES (p_id_fornecedor, p_id_filial_destino, v_numero_pedido, p_data_pedido)
     RETURNING id_reposicao INTO v_id_reposicao;
 
     FOR v_item IN SELECT * FROM jsonb_array_elements(p_itens_reposicao)
     LOOP
         v_id_produto     := (v_item->>'id_produto')::INTEGER;
-        v_id_lote        := (v_item->>'id_lote')::INTEGER;
-        v_quantidade     := (v_item->>'quantidade')::INTEGER; 
+        v_quantidade     := (v_item->>'quantidade')::INTEGER;
         v_valor_unitario := (v_item->>'valor_unitario')::NUMERIC;
 
+        -- O lote é resolvido automaticamente a partir do produto
+        -- (lote daquele produto com a validade mais recente).
+        SELECT id_lote INTO v_id_lote
+        FROM lote
+        WHERE id_produto = v_id_produto
+        ORDER BY data_validade DESC
+        LIMIT 1;
+
+        IF v_id_lote IS NULL THEN
+            RAISE EXCEPTION
+                'Produto % não possui lote cadastrado. Cadastre um lote antes de repor.',
+                v_id_produto;
+        END IF;
+
         -- Apenas insere. O GATILHO trg_atualiza_total_reposicao soma o valor total
-        INSERT INTO item_reposicao (id_reposicao, id_produto, id_lote, quantidade, valor_unitario) 
+        INSERT INTO item_reposicao (id_reposicao, id_produto, id_lote, quantidade, valor_unitario)
         VALUES (v_id_reposicao, v_id_produto, v_id_lote, v_quantidade, v_valor_unitario);
     END LOOP;
 
-    RETURN 'Pedido ' || p_numero_pedido || ' inserido com sucesso. Totais processados automaticamente.';
+    RETURN 'Pedido ' || v_numero_pedido || ' inserido com sucesso. Totais processados automaticamente.';
 END;
 $$ LANGUAGE plpgsql;
 

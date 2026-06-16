@@ -39,5 +39,3 @@ class VendedorPage(CrudPage):
             service=VendedorService,
             id_key="id_vendedor",
         )
-            id_key="id_vendedor",
-        )

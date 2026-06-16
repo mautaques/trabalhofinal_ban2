@@ -32,5 +32,3 @@ class ClientePage(CrudPage):
             service=ClienteService,
             id_key="id_cliente",
         )
-            id_key="id_cliente",
-        )

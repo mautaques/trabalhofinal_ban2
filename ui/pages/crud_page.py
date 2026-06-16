@@ -183,31 +183,3 @@ class CrudPage(QWidget):
                 self.load_data()
             except Exception as exc:
                 QMessageBox.critical(self, "Erro ao Excluir", str(exc))
-            f["name"]: getattr(item, f["name"], None) for f in self._form_fields
-        }
-        dlg = FormDialog(
-            f"Editar — {self._title}", self._form_fields,
-            initial_values=initial, parent=self,
-        )
-        if dlg.exec() == QDialog.DialogCode.Accepted:
-            try:
-                self._service.atualizar(getattr(item, self._id_key), **dlg.get_values())
-                self.load_data()
-            except Exception as exc:
-                QMessageBox.critical(self, "Erro ao Editar", str(exc))
-
-    def _on_excluir(self):
-        item = self._get_selected()
-        if item is None:
-            return
-        reply = QMessageBox.question(
-            self, "Confirmar Exclusão",
-            "Deseja realmente excluir este registro?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-        )
-        if reply == QMessageBox.StandardButton.Yes:
-            try:
-                self._service.excluir(getattr(item, self._id_key))
-                self.load_data()
-            except Exception as exc:
-                QMessageBox.critical(self, "Erro ao Excluir", str(exc))
