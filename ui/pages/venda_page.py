@@ -267,9 +267,10 @@ class _NovaVendaDialog(QDialog):
             pass
         layout.addRow("Cliente:", self.cmb_cliente)
 
-        # Cupom fiscal
+        # Cupom fiscal — inteiro com exatamente 6 dígitos
         self.spn_cupom = QSpinBox()
-        self.spn_cupom.setRange(1, 999_999_999)
+        self.spn_cupom.setRange(100000, 999999)
+        self.spn_cupom.setToolTip("Inteiro com exatamente 6 dígitos (100000 a 999999)")
         layout.addRow("Cupom Fiscal *:", self.spn_cupom)
 
         # Forma de pagamento

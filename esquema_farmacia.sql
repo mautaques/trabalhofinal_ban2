@@ -138,7 +138,7 @@ CREATE TABLE venda (
     id_filial       INTEGER NOT NULL REFERENCES filial(id_filial),
     id_vendedor     INTEGER NOT NULL REFERENCES vendedor(id_vendedor),
     id_cliente      INTEGER REFERENCES cliente(id_cliente),
-    cupom_fiscal    INTEGER UNIQUE NOT NULL,
+    cupom_fiscal    INTEGER UNIQUE NOT NULL CHECK (cupom_fiscal BETWEEN 100000 AND 999999),
     data_hora       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     forma_pagamento VARCHAR(20) CHECK (forma_pagamento IN ('Pix', 'Cartão de Crédito', 'Cartão de Débito')),
     valor_total     NUMERIC(12,2) DEFAULT 0

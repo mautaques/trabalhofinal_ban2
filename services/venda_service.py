@@ -64,6 +64,8 @@ class VendaService:
             raise ValueError("Filial e vendedor são obrigatórios.")
         if not cupom_fiscal:
             raise ValueError("Cupom fiscal é obrigatório.")
+        if not (100000 <= int(cupom_fiscal) <= 999999):
+            raise ValueError("Cupom fiscal deve ser um inteiro com exatamente 6 dígitos.")
 
         with get_session() as session:
             existente = (
