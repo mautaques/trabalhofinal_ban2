@@ -1,6 +1,7 @@
 """Serviço de negócio para a entidade Vendedor."""
 
 from sqlalchemy import or_
+from sqlalchemy.orm import joinedload
 
 from database import get_session
 from models.vendedor import Vendedor
@@ -11,9 +12,14 @@ class VendedorService:
 
     @staticmethod
     def listar_todos():
-        """Retorna todos os vendedores ordenados por nome."""
+        """Retorna todos os vendedores (com a filial) ordenados por nome."""
         with get_session() as session:
-            return session.query(Vendedor).order_by(Vendedor.nome).all()
+            return (
+                session.query(Vendedor)
+                .options(joinedload(Vendedor.filial))
+                .order_by(Vendedor.nome)
+                .all()
+            )
 
     @staticmethod
     def buscar_por_id(id_vendedor: int):
@@ -22,11 +28,23 @@ class VendedorService:
             return session.get(Vendedor, id_vendedor)
 
     @staticmethod
+    def listar_por_filial(id_filial: int):
+        """Retorna os vendedores de uma filial, ordenados por nome."""
+        with get_session() as session:
+            return (
+                session.query(Vendedor)
+                .filter_by(id_filial=id_filial)
+                .order_by(Vendedor.nome)
+                .all()
+            )
+
+    @staticmethod
     def buscar(termo: str):
         """Busca vendedores por nome, CPF ou cargo."""
         with get_session() as session:
             return (
                 session.query(Vendedor)
+                .options(joinedload(Vendedor.filial))
                 .filter(
                     or_(
                         Vendedor.nome.ilike(f"%{termo}%"),
@@ -45,6 +63,7 @@ class VendedorService:
         matricula,
         cargo,
         data_admissao,
+        id_filial,
         comissao_percentual=None,
     ):
         """Cria um novo vendedor. Valida unicidade de CPF e matrícula."""
@@ -54,6 +73,8 @@ class VendedorService:
             raise ValueError("Matrícula é obrigatória.")
         if not data_admissao:
             raise ValueError("Data de admissão é obrigatória.")
+        if not id_filial:
+            raise ValueError("Filial é obrigatória.")
 
         with get_session() as session:
             if session.query(Vendedor).filter_by(cpf=cpf).first():
@@ -68,6 +89,7 @@ class VendedorService:
                 cargo=cargo,
                 data_admissao=data_admissao,
                 comissao_percentual=comissao_percentual,
+                id_filial=id_filial,
             )
             session.add(vendedor)
             session.commit()

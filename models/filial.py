@@ -20,6 +20,7 @@ class Filial(Base):
     endereco: Mapped[Optional[str]] = mapped_column(Text)
 
     # Relacionamentos
+    vendedores = relationship("Vendedor", back_populates="filial")
     vendas = relationship("Venda", back_populates="filial")
 
     def __repr__(self) -> str:

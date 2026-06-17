@@ -1,5 +1,6 @@
 """Página de CRUD para Vendedores."""
 
+from services.filial_service import FilialService
 from services.vendedor_service import VendedorService
 from ui.pages.crud_page import CrudPage
 
@@ -7,6 +8,16 @@ from ui.pages.crud_page import CrudPage
 class VendedorPage(CrudPage):
     def __init__(self, parent=None):
         super().__init__(parent)
+
+        # Opções de filial para o combo (cada vendedor pertence a uma filial).
+        try:
+            filiais = [
+                (f.id_filial, f"{f.codigo_filial} — {f.nome_fantasia}")
+                for f in FilialService.listar_todos()
+            ]
+        except Exception:
+            filiais = []
+
         self.init_page(
             title="Vendedores",
             columns=[
@@ -15,6 +26,7 @@ class VendedorPage(CrudPage):
                 {"key": "cpf", "label": "CPF"},
                 {"key": "matricula", "label": "Matrícula"},
                 {"key": "cargo", "label": "Cargo"},
+                {"key": "filial_nome", "label": "Filial"},
                 {"key": "data_admissao", "label": "Admissão"},
                 {"key": "comissao_percentual", "label": "Comissão (%)"},
             ],
@@ -31,6 +43,8 @@ class VendedorPage(CrudPage):
                      ("Atendente", "Atendente"),
                      ("Farmacêutico", "Farmacêutico"),
                  ]},
+                {"name": "id_filial", "label": "Filial", "type": "combobox",
+                 "required": True, "options": filiais},
                 {"name": "data_admissao", "label": "Data de Admissão",
                  "type": "date", "required": True},
                 {"name": "comissao_percentual", "label": "Comissão (%)",

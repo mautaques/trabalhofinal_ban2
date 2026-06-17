@@ -251,16 +251,11 @@ class _NovaVendaDialog(QDialog):
             pass
         layout.addRow("Filial *:", self.cmb_filial)
 
-        # Vendedor
+        # Vendedor — só os da filial selecionada (cada vendedor é de uma filial).
         self.cmb_vendedor = QComboBox()
-        try:
-            for v in VendedorService.listar_todos():
-                self.cmb_vendedor.addItem(
-                    f"{v.matricula} — {v.nome}", v.id_vendedor
-                )
-        except Exception:
-            pass
         layout.addRow("Vendedor *:", self.cmb_vendedor)
+        self.cmb_filial.currentIndexChanged.connect(self._atualiza_vendedores)
+        self._atualiza_vendedores()
 
         # Cliente (opcional)
         self.cmb_cliente = QComboBox()
@@ -295,6 +290,20 @@ class _NovaVendaDialog(QDialog):
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addRow(buttons)
+
+    def _atualiza_vendedores(self):
+        """Recarrega o combo de vendedores conforme a filial selecionada."""
+        self.cmb_vendedor.clear()
+        id_filial = self.cmb_filial.currentData()
+        if id_filial is None:
+            return
+        try:
+            for v in VendedorService.listar_por_filial(id_filial):
+                self.cmb_vendedor.addItem(
+                    f"{v.matricula} — {v.nome}", v.id_vendedor
+                )
+        except Exception:
+            pass
 
     def get_values(self) -> dict:
         return {

@@ -9,8 +9,21 @@ CREATE TABLE medico (
     crm       VARCHAR(9) NOT NULL
 );
 
+-- Filial é criada antes de Vendedor porque Vendedor referencia Filial
+-- (cada vendedor trabalha em exatamente uma filial).
+CREATE TABLE filial (
+    id_filial     SERIAL PRIMARY KEY,
+    codigo_filial VARCHAR(10) UNIQUE NOT NULL,
+    cnpj          VARCHAR(20) UNIQUE NOT NULL,
+    nome_fantasia VARCHAR(150) NOT NULL,
+    nome_gerente  VARCHAR(150) NOT NULL,
+    telefone      VARCHAR(20),
+    endereco      TEXT
+);
+
 CREATE TABLE vendedor (
     id_vendedor         SERIAL PRIMARY KEY,
+    id_filial           INTEGER NOT NULL REFERENCES filial(id_filial),
     nome                VARCHAR(150) NOT NULL,
     cpf                 VARCHAR(12) UNIQUE NOT NULL,
     matricula           INTEGER UNIQUE NOT NULL,
@@ -50,16 +63,6 @@ CREATE TABLE produto (
     preco_venda      NUMERIC(10,2) CHECK (preco_venda >= 0),
     margem_lucro     NUMERIC(10, 2) GENERATED ALWAYS AS (preco_venda - preco_custo) STORED,
     descricao        TEXT
-);
-
-CREATE TABLE filial (
-    id_filial     SERIAL PRIMARY KEY,
-    codigo_filial VARCHAR(10) UNIQUE NOT NULL,
-    cnpj          VARCHAR(20) UNIQUE NOT NULL,
-    nome_fantasia VARCHAR(150) NOT NULL,
-    nome_gerente  VARCHAR(150) NOT NULL,
-    telefone      VARCHAR(20),
-    endereco      TEXT
 );
 
 CREATE TABLE lote (
@@ -183,19 +186,26 @@ INSERT INTO medico (nome, crm) VALUES
     ('Henrique Barbosa',         '10342-SC'),
     ('Camila Ferreira',          '4471-SC');
 
+-- 1.1 Filial (inserida antes de Vendedor por causa do FK vendedor.id_filial)
+-- 3 registros
+INSERT INTO filial (codigo_filial, cnpj, nome_fantasia, nome_gerente, telefone, endereco) VALUES
+    ('FIL-001', '12.345.678/0001-01', 'FarmaJoinville Centro',  'Roberto Mendes',  '(47) 3322-0001', 'Rua Princesa Isabel, 500, Centro, Joinville/SC'),
+    ('FIL-002', '12.345.678/0002-02', 'FarmaJoinville Norte',   'Sandra Ferreira', '(47) 3322-0002', 'Av. Santos Dumont, 1200, Boa Vista, Joinville/SC'),
+    ('FIL-003', '12.345.678/0003-03', 'FarmaJoinville Sul',     'Marcos Andrade',  '(47) 3322-0003', 'Rua XV de Novembro, 800, Aventureiro, Joinville/SC');
+
 -- 2. Vendedor
--- 10 regisros
-INSERT INTO vendedor (nome, cpf, matricula, cargo, data_admissao, comissao_percentual) VALUES
-    ('João Pereira',        '10122233344', 1001, 'Atendente',  '2021-03-10', 2.5),
-    ('Aline Martins',       '20233344455', 1002, 'Atendente',  '2020-07-15', 2.5),
-    ('Rafael Costa',        '30344455566', 1003, 'Atendente',  '2022-01-20', 2.5),
-    ('Bruna Oliveira',      '40455566677', 1004, 'Farmacêutico','2019-05-08', 3.0),
-    ('Diego Nascimento',    '50566677788', 1005, 'Atendente',  '2023-02-14', 2.5),
-    ('Tatiane Rodrigues',   '60677788899', 1006, 'Farmacêutico','2018-11-30', 3.0),
-    ('Lucas Freitas',       '70788899900', 1007, 'Atendente',  '2022-08-01', 2.5),
-    ('Mariana Gomes',       '80899900011', 1008, 'Atendente',  '2021-10-25', 2.5),
-    ('Thiago Batista',      '90900011122', 1009, 'Farmacêutico','2017-06-18', 3.0),
-    ('Vanessa Cunha',       '01011122233', 1010, 'Atendente',  '2023-09-05', 2.5);
+-- 10 registros (id_filial: cada vendedor trabalha em uma única filial)
+INSERT INTO vendedor (id_filial, nome, cpf, matricula, cargo, data_admissao, comissao_percentual) VALUES
+    (1, 'João Pereira',        '10122233344', 1001, 'Atendente',  '2021-03-10', 2.5),
+    (1, 'Aline Martins',       '20233344455', 1002, 'Atendente',  '2020-07-15', 2.5),
+    (2, 'Rafael Costa',        '30344455566', 1003, 'Atendente',  '2022-01-20', 2.5),
+    (1, 'Bruna Oliveira',      '40455566677', 1004, 'Farmacêutico','2019-05-08', 3.0),
+    (2, 'Diego Nascimento',    '50566677788', 1005, 'Atendente',  '2023-02-14', 2.5),
+    (2, 'Tatiane Rodrigues',   '60677788899', 1006, 'Farmacêutico','2018-11-30', 3.0),
+    (3, 'Lucas Freitas',       '70788899900', 1007, 'Atendente',  '2022-08-01', 2.5),
+    (3, 'Mariana Gomes',       '80899900011', 1008, 'Atendente',  '2021-10-25', 2.5),
+    (3, 'Thiago Batista',      '90900011122', 1009, 'Farmacêutico','2017-06-18', 3.0),
+    (1, 'Vanessa Cunha',       '01011122233', 1010, 'Atendente',  '2023-09-05', 2.5);
  
 -- 3. Cliente
 -- 15 registros
@@ -259,13 +269,6 @@ INSERT INTO produto (codigo_de_barras, nome_produto, categoria, fabricante,
     (7891234560018, 'Barra de Cereal Integral',   'Conveniência', 'Trio',      NULL,                  1.50,   3.90, 'Barra de cereal integral frutas — 25g'),
     (7891234560019, 'Vitamina C 1g cx/10',        'Conveniência', 'Cimed',     'Ácido Ascórbico',     5.00,  11.90, 'Vitamina C efervescente 1g — 10 comprimidos'),
     (7891234560020, 'Máscara Descartável cx/50',  'Conveniência', 'Descarpack', NULL,                  8.00,  18.90, 'Máscara descartável tripla camada — cx com 50');
- 
--- 6. Filial 
--- 3 registros
-INSERT INTO filial (codigo_filial, cnpj, nome_fantasia, nome_gerente, telefone, endereco) VALUES
-    ('FIL-001', '12.345.678/0001-01', 'FarmaJoinville Centro',  'Roberto Mendes',  '(47) 3322-0001', 'Rua Princesa Isabel, 500, Centro, Joinville/SC'),
-    ('FIL-002', '12.345.678/0002-02', 'FarmaJoinville Norte',   'Sandra Ferreira', '(47) 3322-0002', 'Av. Santos Dumont, 1200, Boa Vista, Joinville/SC'),
-    ('FIL-003', '12.345.678/0003-03', 'FarmaJoinville Sul',     'Marcos Andrade',  '(47) 3322-0003', 'Rua XV de Novembro, 800, Aventureiro, Joinville/SC');
  
 -- 7. Lote
 -- 13 registros (um lote por produto estocado; id_lote segue a ordem abaixo)

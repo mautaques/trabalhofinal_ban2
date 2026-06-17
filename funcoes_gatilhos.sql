@@ -432,3 +432,32 @@ DROP TRIGGER IF EXISTS trg_alerta_estoque_minimo ON estoque;
 CREATE TRIGGER trg_alerta_estoque_minimo
 AFTER UPDATE OF quantidade ON estoque
 FOR EACH ROW EXECUTE FUNCTION func_alerta_estoque_minimo();
+
+
+/* Gatilho 5
+Garante que o vendedor de uma venda pertence à filial da própria venda
+(cada vendedor trabalha em uma única filial — vendedor.id_filial).
+*/
+CREATE OR REPLACE FUNCTION func_valida_vendedor_filial()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_id_filial_vendedor INTEGER;
+BEGIN
+    SELECT id_filial INTO v_id_filial_vendedor
+    FROM vendedor
+    WHERE id_vendedor = NEW.id_vendedor;
+
+    IF v_id_filial_vendedor IS DISTINCT FROM NEW.id_filial THEN
+        RAISE EXCEPTION
+            'O vendedor % pertence à filial % e não pode vender na filial %.',
+            NEW.id_vendedor, v_id_filial_vendedor, NEW.id_filial;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_valida_vendedor_filial ON venda;
+CREATE TRIGGER trg_valida_vendedor_filial
+BEFORE INSERT OR UPDATE ON venda
+FOR EACH ROW EXECUTE FUNCTION func_valida_vendedor_filial();
